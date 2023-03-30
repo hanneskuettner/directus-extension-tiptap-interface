@@ -1,0 +1,70 @@
+{
+	"name": "directus-extension-tiptap-interface",
+	"description": "A notion-like editing experience ",
+	"icon": "extension",
+	"version": "0.0.1",
+	"type": "module",
+	"keywords": [
+		"directus",
+		"directus-extension",
+		"directus-custom-interface"
+	],
+	"directus:extension": {
+		"type": "interface",
+		"path": "dist/index.js",
+		"source": "src/index.ts",
+		"host": "^9.23.4"
+	},
+	"scripts": {
+		"build": "directus-extension build",
+		"dev": "directus-extension build -w --no-minify",
+		"link": "directus-extension link",
+		"lint": "eslint ."
+	},
+	"devDependencies": {
+		"@directus/app": "^9.23.4",
+		"@directus/extensions-sdk": "9.23.4",
+		"@tiptap/core": "2.0.0-beta.220",
+		"@tiptap/extension-bold": "2.0.0-beta.220",
+		"@tiptap/extension-bubble-menu": "2.0.0-beta.220",
+		"@tiptap/extension-bullet-list": "2.0.0-beta.220",
+		"@tiptap/extension-code": "2.0.0-beta.220",
+		"@tiptap/extension-code-block": "2.0.0-beta.220",
+		"@tiptap/extension-document": "2.0.0-beta.220",
+		"@tiptap/extension-dropcursor": "2.0.0-beta.220",
+		"@tiptap/extension-focus": "2.0.0-beta.220",
+		"@tiptap/extension-hard-break": "2.0.0-beta.220",
+		"@tiptap/extension-heading": "2.0.0-beta.220",
+		"@tiptap/extension-history": "2.0.0-beta.220",
+		"@tiptap/extension-horizontal-rule": "2.0.0-beta.220",
+		"@tiptap/extension-image": "2.0.0-beta.220",
+		"@tiptap/extension-italic": "2.0.0-beta.220",
+		"@tiptap/extension-link": "2.0.0-beta.220",
+		"@tiptap/extension-list-item": "2.0.0-beta.220",
+		"@tiptap/extension-ordered-list": "2.0.0-beta.220",
+		"@tiptap/extension-paragraph": "2.0.0-beta.220",
+		"@tiptap/extension-placeholder": "2.0.0-beta.220",
+		"@tiptap/extension-strike": "2.0.0-beta.220",
+		"@tiptap/extension-text": "2.0.0-beta.220",
+		"@tiptap/extension-typography": "2.0.0-beta.220",
+		"@tiptap/extension-underline": "2.0.0-beta.220",
+		"@tiptap/pm": "2.0.0-beta.220",
+		"@tiptap/suggestion": "2.0.0-beta.220",
+		"@tiptap/vue-3": "2.0.0-beta.220",
+		"@typescript-eslint/eslint-plugin": "^5.56.0",
+		"@typescript-eslint/parser": "^5.56.0",
+		"eslint": "^8.36.0",
+		"eslint-config-prettier": "^8.8.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-vue": "^9.10.0",
+		"lodash": "^4.17.21",
+		"prettier": "^2.8.7",
+		"rollup-plugin-copy": "^3.4.0",
+		"sass": "^1.60.0",
+		"typescript": "^5.0.2"
+	},
+	"peerDependencies": {
+		"vue": "^3.2.47",
+		"vue-i18n": "^9.2.2"
+	}
+}
