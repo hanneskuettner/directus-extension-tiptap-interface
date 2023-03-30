@@ -31,8 +31,8 @@ function createFilter(query: string, editor: Editor) {
 	query = unify(query);
 	return (item: CommandItem) =>
 		isEnabled(item, editor) &&
-		(unify(item.group + item.title).includes(query) ||
-			unify(item.title + item.group).includes(query) ||
+		(unify(item.title).includes(query) ||
+			unify(item.group).includes(query) ||
 			(commandGroups[item.group] && unify(commandGroups[item.group].title).includes(query)));
 }
 
@@ -184,7 +184,7 @@ const commands: CommandItem[] = [
 		contentType: 'bulletList',
 	},
 	{
-		title: 'Ordered list',
+		title: 'Numbered list',
 		icon: 'format_list_numbered',
 		group: 'basicBlock',
 		command: createBlockWith('orderedList', {}, { onEmptyParagraph: runCommand('toggleOrderedList') }),
@@ -192,12 +192,28 @@ const commands: CommandItem[] = [
 		contentType: 'orderedList',
 	},
 	{
-		title: 'Ordered list',
+		title: 'Numbered list',
 		icon: 'format_list_numbered',
 		group: 'turnInto',
 		command: runCommand('toggleOrderedList'),
 		enabled: isExtensionInstalled('orderedList'),
 		contentType: 'orderedList',
+	},
+	{
+		title: 'Quote',
+		icon: 'format_quote',
+		group: 'basicBlock',
+		command: createBlockWith('blockquote', {}, { onEmptyParagraph: runCommand('setBlockquote') }),
+		enabled: isExtensionInstalled('blockquote'),
+		contentType: 'blockquote',
+	},
+	{
+		title: 'Quote',
+		icon: 'format_quote',
+		group: 'turnInto',
+		command: runCommand('setBlockquote'),
+		enabled: isExtensionInstalled('blockquote'),
+		contentType: 'blockquote',
 	},
 	{
 		title: 'Divider',

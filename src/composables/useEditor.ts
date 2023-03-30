@@ -1,6 +1,7 @@
 import { EditorOptions, Extensions } from '@tiptap/core';
 import { useEditor as useTiptapEditor } from '@tiptap/vue-3';
 import BlockGroup from '../extensions/block-group';
+import Blockquote from '../extensions/blockquote';
 import Bold from '../extensions/bold';
 import BulletList from '../extensions/bullet-list';
 import Code from '../extensions/code';
@@ -32,6 +33,7 @@ import placeholder from '../placeholder';
 export function useEditor(options: Partial<EditorOptions> = {}) {
 	const buildInExtensions: Extensions = [
 		BlockGroup,
+		Blockquote,
 		Bold,
 		BulletList,
 		Code,
@@ -39,7 +41,9 @@ export function useEditor(options: Partial<EditorOptions> = {}) {
 			exitOnTripleEnter: false,
 		}),
 		Document,
-		DocumentBlock,
+		DocumentBlock.configure({
+			ignoreKeysIn: ['codeBlock'],
+		}),
 		DropCursor.configure({
 			color: 'var(--primary)',
 			width: 2,

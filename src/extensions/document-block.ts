@@ -37,6 +37,10 @@ interface CreateBlockOptions {
 	updateSelection?: boolean;
 }
 
+export interface DocumentBlockOptions {
+	ignoreKeysIn: string[];
+}
+
 declare module '@tiptap/core' {
 	interface Commands<ReturnType> {
 		block: {
@@ -47,7 +51,7 @@ declare module '@tiptap/core' {
 	}
 }
 
-export const DocumentBlock = Node.create({
+export const DocumentBlock = Node.create<DocumentBlockOptions>({
 	name: 'docBlock',
 	group: 'docBlock',
 	content: 'block blockGroup*',
@@ -57,6 +61,7 @@ export const DocumentBlock = Node.create({
 
 	addOptions() {
 		return {
+			ignoreKeysIn: [],
 			HTMLAttributes: {},
 		};
 	},
@@ -140,14 +145,14 @@ export const DocumentBlock = Node.create({
 		const handleEnter = () =>
 			this.editor.commands.first(({ commands }) => [
 				() => commands.deleteSelection(),
-				() => commands.convertToDefaultState({ skip: ['codeBlock'] }),
+				() => commands.convertToDefaultState({ skip: this.options.ignoreKeysIn }),
 				// if at the end of a block, create a new block below
 				() =>
 					commands.command(({ state }) => {
 						const { $to } = state.selection;
 						const { contentType } = getBlockInfoFromResolvedPos($to)!;
 
-						if (contentType.name === 'codeBlock') {
+						if (this.options.ignoreKeysIn.indexOf(contentType.name) !== -1) {
 							return false;
 						}
 
@@ -163,7 +168,7 @@ export const DocumentBlock = Node.create({
 						const { $to } = state.selection;
 						const { contentType } = getBlockInfoFromResolvedPos($to)!;
 
-						if (contentType.name === 'codeBlock') {
+						if (this.options.ignoreKeysIn.indexOf(contentType.name) !== -1) {
 							return false;
 						}
 
@@ -180,7 +185,7 @@ export const DocumentBlock = Node.create({
 						const { $head, from, $to } = selection;
 						const { contentType } = getBlockInfoFromResolvedPos($head)!;
 
-						if (contentType.name === 'codeBlock') {
+						if (this.options.ignoreKeysIn.indexOf(contentType.name) !== -1) {
 							return false;
 						}
 
