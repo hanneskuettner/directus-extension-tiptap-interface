@@ -3,6 +3,8 @@ import Suggestion from '@tiptap/suggestion';
 
 export const SlashCommand = Extension.create({
 	name: 'slashCommand',
+	// make sure the key handlers always get priority
+	priority: 1000,
 
 	addOptions() {
 		return {

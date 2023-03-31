@@ -46,7 +46,7 @@ declare module '@tiptap/core' {
 		block: {
 			createBlockAbove: (options?: CreateBlockOptions) => ReturnType;
 			createBlockBelow: (options?: CreateBlockOptions) => ReturnType;
-			convertToDefaultState: (options?: { skip?: string[] }) => ReturnType;
+			convertBlockToDefaultState: (options?: { skip?: string[] }) => ReturnType;
 		};
 	}
 }
@@ -58,6 +58,7 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 	draggable: true,
 	selectable: false,
 	defining: true,
+	priority: 200,
 
 	addOptions() {
 		return {
@@ -84,7 +85,7 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 				() => commands.deleteSelection(),
 				() => commands.undoInputRule(),
 				// maybe convert the block back to its default state (a paragraph)
-				() => commands.convertToDefaultState(),
+				() => commands.convertBlockToDefaultState(),
 				// removes a level of nesting if the block is indented if the selection is at the start of the block.
 				() =>
 					commands.command(({ state }) => {
@@ -145,7 +146,7 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 		const handleEnter = () =>
 			this.editor.commands.first(({ commands }) => [
 				() => commands.deleteSelection(),
-				() => commands.convertToDefaultState({ skip: this.options.ignoreKeysIn }),
+				() => commands.convertBlockToDefaultState({ skip: this.options.ignoreKeysIn }),
 				// if at the end of a block, create a new block below
 				() =>
 					commands.command(({ state }) => {
@@ -279,7 +280,7 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 					}
 					return true;
 				},
-			convertToDefaultState:
+			convertBlockToDefaultState:
 				(options?) =>
 				({ commands, tr }) => {
 					options = {
