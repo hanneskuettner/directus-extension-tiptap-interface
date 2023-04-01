@@ -9,7 +9,7 @@
 import { Editor, EditorContent, JSONContent } from '@tiptap/vue-3';
 import { useEditor } from '../composables/useEditor';
 import { ref, toRefs, watch } from 'vue';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 import FloatingToolbar from './floating-toolbar.vue';
 import { blocksToDoc, docToBlocks } from '../utils/node-conversions';
 import { BlockNode } from '../types/block';
@@ -42,7 +42,7 @@ watch([blocks, editor], () => {
 			state: { tr, doc: oldDoc },
 		} = editor.value;
 
-		const doc = blocksToDoc(blocks.value as BlockNode[], editor.value.schema);
+		const doc = blocksToDoc((blocks.value || []) as BlockNode[], editor.value.schema);
 		view.dispatch(
 			tr.replaceWith(0, oldDoc.content.size, doc).setMeta('preventUpdate', true).setMeta('addToHistory', false)
 		);
@@ -95,7 +95,7 @@ function createEditor() {
 	padding-inline-start: 20px;
 }
 
-.content :deep([data-placeholder].empty:before) {
+.content :deep([data-placeholder].empty:not(.no-placeholder):before) {
 	content: attr(data-placeholder);
 	opacity: 0.4;
 	float: left;

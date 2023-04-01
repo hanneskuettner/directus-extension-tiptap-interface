@@ -31,13 +31,14 @@ specifiers:
   '@tiptap/pm': 2.0.1
   '@tiptap/suggestion': 2.0.1
   '@tiptap/vue-3': 2.0.1
+  '@types/lodash-es': ^4.17.7
   '@typescript-eslint/eslint-plugin': ^5.56.0
   '@typescript-eslint/parser': ^5.56.0
   eslint: ^8.36.0
   eslint-config-prettier: ^8.8.0
   eslint-plugin-prettier: ^4.2.1
   eslint-plugin-vue: ^9.10.0
-  lodash: ^4.17.21
+  lodash-es: ^4.17.21
   prettier: ^2.8.7
   rollup-plugin-copy: ^3.4.0
   sass: ^1.60.0
@@ -74,13 +75,14 @@ devDependencies:
   '@tiptap/pm': 2.0.1_@tiptap+core@2.0.1
   '@tiptap/suggestion': 2.0.1_kgpvjfqr6qx2oftbyy6alylmx4
   '@tiptap/vue-3': 2.0.1_kgpvjfqr6qx2oftbyy6alylmx4
+  '@types/lodash-es': 4.17.7
   '@typescript-eslint/eslint-plugin': 5.56.0_2hcjazgfnbtq42tcc73br2vup4
   '@typescript-eslint/parser': 5.56.0_j4766f7ecgqbon3u7zlxn5zszu
   eslint: 8.36.0
   eslint-config-prettier: 8.8.0_eslint@8.36.0
   eslint-plugin-prettier: 4.2.1_ywlv3zveqg2kxfq44lflihh5mm
   eslint-plugin-vue: 9.10.0_eslint@8.36.0
-  lodash: 4.17.21
+  lodash-es: 4.17.21
   prettier: 2.8.7
   rollup-plugin-copy: 3.4.0
   sass: 1.60.0
@@ -1048,6 +1050,16 @@ packages:
 
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
+    dev: true
+
+  /@types/lodash-es/4.17.7:
+    resolution: {integrity: sha512-z0ptr6UI10VlU6l5MYhGwS4mC8DZyYer2mCoyysZtSF7p26zOX8UpbrV0YpNYLGS8K4PUFIyEr62IMFFjveSiQ==}
+    dependencies:
+      '@types/lodash': 4.14.192
+    dev: true
+
+  /@types/lodash/4.14.192:
+    resolution: {integrity: sha512-km+Vyn3BYm5ytMO13k9KTp27O75rbQ0NFw+U//g+PX7VZyjCioXaRFisqSIJRECljcTv73G3i6BpglNGHgUQ5A==}
     dev: true
 
   /@types/minimatch/5.1.2:
@@ -2900,6 +2912,10 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       p-locate: 5.0.0
+    dev: true
+
+  /lodash-es/4.17.21:
+    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
     dev: true
 
   /lodash.flatten/4.4.0:

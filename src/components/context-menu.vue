@@ -5,16 +5,28 @@
 		</template>
 		<v-list>
 			<v-list-item clickable :class="{ 'confirm-delete': confirmDelete }" @click="onDeleteClicked">
-				<v-list-item-icon><v-icon name="delete" /></v-list-item-icon>
+				<v-list-item-icon>
+					<v-icon name="delete" />
+				</v-list-item-icon>
 				<v-list-item-content>
 					{{ confirmDelete ? 'Click to Confirm' : 'Delete' }}
 				</v-list-item-content>
 			</v-list-item>
-			<v-divider v-if="isImageBlock" />
-			<v-list-item v-if="isImageBlock" clickable @click="imageDialogOpen = true">
-				<v-list-item-icon><v-icon name="cached" /></v-list-item-icon>
-				<v-list-item-content>Replace Image</v-list-item-content>
-			</v-list-item>
+			<template v-if="isImageBlock">
+				<v-divider />
+				<v-list-item clickable @click="setCaption">
+					<v-list-item-icon>
+						<v-icon name="subtitles" />
+					</v-list-item-icon>
+					<v-list-item-content>Caption</v-list-item-content>
+				</v-list-item>
+				<v-list-item clickable @click="imageDialogOpen = true">
+					<v-list-item-icon>
+						<v-icon name="cached" />
+					</v-list-item-icon>
+					<v-list-item-content>Replace Image</v-list-item-content>
+				</v-list-item>
+			</template>
 		</v-list>
 	</v-menu>
 
@@ -33,25 +45,27 @@
 
 <script lang="ts" setup>
 import { useI18n } from 'vue-i18n';
-import { ref, watch } from 'vue';
+import { computed, ref, toRefs, watch } from 'vue';
 import { getPublicURL } from '../utils/get-root-path';
 import { Node } from '@tiptap/pm/model';
 import { Editor } from '@tiptap/vue-3';
+import { getBlockInfoFromPos } from '../utils/block-info';
+import { controlledComputed } from '../utils/controlled-computed';
+import { IMAGE_TYPE_NAMES } from '../constants';
 
 const props = withDefaults(
 	defineProps<{
 		placement?: string;
 		node: Node;
-		selectBlock: () => void;
-		getFirstChildPos: () => any;
+		getPos: () => number;
 		editor: Editor;
-		isImageBlock?: boolean;
 	}>(),
 	{
 		placement: 'bottom',
 		isImageBlock: false,
 	}
 );
+const { getPos } = toRefs(props);
 
 const emit = defineEmits<{
 	(e: 'deleted');
@@ -69,30 +83,47 @@ watch(open, () => {
 	}
 });
 
+const blockInfo = controlledComputed(
+	() => getPos.value(),
+	() => getBlockInfoFromPos(props.editor.state.doc, getPos.value())
+);
+const isImageBlock = computed(() => IMAGE_TYPE_NAMES.includes(blockInfo.value?.contentType.name));
+
 function onDeleteClicked() {
 	if (!confirmDelete.value) {
 		confirmDelete.value = true;
 	} else {
 		confirmDelete.value = false;
-		props.selectBlock();
-		props.editor.commands.deleteSelection();
+		props.editor.chain().focus().setNodeSelection(blockInfo.value.pos).deleteSelection().run();
 		emit('deleted');
 	}
 }
 
 function onImageUpload(image: any) {
 	let url = getPublicURL() + `assets/` + image.id;
+	const { editor } = props;
+	const { view, state } = editor;
 
 	// TODO
 	// if (props.imageToken) {
 	//   url += '?access_token=' + props.imageToken;
 	// }
 
-	const view = props.editor.view;
-	view.dispatch(view.state.tr.setNodeMarkup(props.getFirstChildPos(), null, { src: url }));
+	console.log(blockInfo.value, url, image.id);
+	view.dispatch(state.tr.setNodeMarkup(blockInfo.value.start, null, { src: url, id: image.id }));
 
 	imageDialogOpen.value = false;
 	emit('imageUploaded', image);
+}
+
+function setCaption() {
+	const { editor } = props;
+
+	editor
+		.chain()
+		.focus()
+		.imageToFigure({ range: { from: blockInfo.value.start, to: blockInfo.value.end } })
+		.run();
 }
 </script>
 

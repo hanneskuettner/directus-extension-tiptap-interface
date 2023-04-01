@@ -1,11 +1,9 @@
-import { VueRenderer } from '@tiptap/vue-3';
-
-import CommandsList from './components/command-list.vue';
+import { ChainedCommands, VueRenderer } from '@tiptap/vue-3';
+import { Editor, Range, RawCommands } from '@tiptap/core';
 import { nextTick } from 'vue';
-import { Editor, Range } from '@tiptap/core';
 import { Attrs } from '@tiptap/pm/model';
 import { isExtensionInstalled } from './helpers/isExtensionInstalled';
-import { RawCommands } from '@tiptap/core/dist/packages/core/src/types';
+import CommandsList from './components/command-list.vue';
 
 export interface CommandItem {
 	title: string;
@@ -82,18 +80,28 @@ function createBlockWith(name: string, attrs?: Attrs, options?: CreateBlockOptio
 
 function turnInto(name: string, attrs?: Attrs) {
 	return ({ editor, range }: { editor: Editor; range: Range }) =>
-		editor.chain().focus().deleteRange(range).setNode(name, attrs).run();
+		editor.chain().focus().deleteRange(range).clearNodes().setNode(name, attrs).run();
 }
 
-function runCommand(name: keyof RawCommands, ...args: any[]) {
-	return ({ editor, range }: { editor: Editor; range: Range }) =>
-		editor
-			.chain()
-			.focus()
-			.deleteRange(range)
-			// @ts-ignore
-			[name](...args)
-			.run();
+interface RunCommandOptions {
+	before?: ({ editor, chain }: { editor: Editor; chain: ChainedCommands }) => ChainedCommands;
+	after?: ({ editor, chain }: { editor: Editor; chain: ChainedCommands }) => ChainedCommands;
+}
+
+function runCommand(name: keyof RawCommands, options?: RunCommandOptions, ...args: any[]) {
+	return ({ editor, range }: { editor: Editor; range: Range }) => {
+		const { before, after }: RunCommandOptions = {
+			before: ({ chain }) => chain,
+			after: ({ chain }) => chain,
+			...options,
+		};
+		after({
+			chain: before({ chain: editor.chain().focus().deleteRange(range), editor })
+				// @ts-ignore
+				[name](...args),
+			editor,
+		}).run();
+	};
 }
 
 const commandGroups = {
@@ -179,7 +187,7 @@ const commands: CommandItem[] = [
 		title: 'Bulleted list',
 		icon: 'format_list_bulleted',
 		group: 'turnInto',
-		command: runCommand('toggleBulletList'),
+		command: runCommand('toggleBulletList', { before: ({ chain }) => chain.clearNodes() }),
 		enabled: isExtensionInstalled('bulletList'),
 		contentType: 'bulletList',
 	},
@@ -195,7 +203,7 @@ const commands: CommandItem[] = [
 		title: 'Numbered list',
 		icon: 'format_list_numbered',
 		group: 'turnInto',
-		command: runCommand('toggleOrderedList'),
+		command: runCommand('toggleOrderedList', { before: ({ chain }) => chain.clearNodes() }),
 		enabled: isExtensionInstalled('orderedList'),
 		contentType: 'orderedList',
 	},
@@ -211,13 +219,13 @@ const commands: CommandItem[] = [
 		title: 'Quote',
 		icon: 'format_quote',
 		group: 'turnInto',
-		command: runCommand('setBlockquote'),
+		command: runCommand('setBlockquote', { before: ({ chain }) => chain.clearNodes() }),
 		enabled: isExtensionInstalled('blockquote'),
 		contentType: 'blockquote',
 	},
 	{
 		title: 'Divider',
-		icon: 'minimize',
+		icon: 'horizontal_rule',
 		group: 'basicBlock',
 		command: createBlockWith('horizontalRule', {}, { updateSelection: false }),
 		enabled: isExtensionInstalled('image'),

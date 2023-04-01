@@ -10,13 +10,7 @@
 					@click.exact.prevent="addBelow"
 					@click.alt.exact.prevent="addAbove"
 				/>
-				<context-menu
-					:editor="editor"
-					:get-first-child-pos="getFirstChildPos"
-					:select-block="selectBlock"
-					:is-image-block="isImageBlock"
-					placement="left-start"
-				>
+				<context-menu :editor="editor" :get-pos="getPos" placement="left-start">
 					<template #activator="{ toggle }">
 						<v-icon
 							ref="dragHandle"
@@ -54,20 +48,10 @@ const { node, editor, getPos } = toRefs(props);
 const dragHandle = ref<HTMLElement | null>(null);
 const showTooltip = ref(true);
 
-const isImageBlock = computed(() => node.value.child(0).type.name == 'image');
-
 function onDragEnd() {
 	showTooltip.value = true;
 	// HACK: this seems to be the only way to prevent the tooltip from showing up at the previous drag location
 	document.getElementById('tooltip')?.remove();
-}
-
-function getFirstChildPos() {
-	return getPos.value() + 1;
-}
-
-function selectBlock() {
-	editor.value.commands.setNodeSelection(getPos.value());
 }
 
 function addAbove() {

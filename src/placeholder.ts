@@ -2,6 +2,7 @@ import { Node } from '@tiptap/pm/model';
 
 const placeholder: Record<string, string | ((node: Node) => string)> = {
 	heading: (node) => `Heading ${node.attrs.level}`,
+	figure: 'Write a caption...',
 	codeBlock: '',
 };
 

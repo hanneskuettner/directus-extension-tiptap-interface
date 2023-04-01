@@ -13,6 +13,7 @@ import HardBreak from '../extensions/hard-break';
 import History from '../extensions/history';
 import Heading from '../extensions/heading';
 import HorizontalRule from '../extensions/horizontal-rule';
+import Figure from '../extensions/figure';
 import Focus from '../extensions/focus';
 import Image from '../extensions/image';
 import Italic from '../extensions/italic';
@@ -48,6 +49,7 @@ export function useEditor(options: Partial<EditorOptions> = {}) {
 			color: 'var(--primary)',
 			width: 2,
 		}),
+		Figure,
 		Focus.configure({
 			className: 'has-focus',
 			mode: 'shallowest',

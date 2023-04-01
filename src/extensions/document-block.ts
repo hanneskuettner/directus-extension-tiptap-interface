@@ -4,6 +4,7 @@ import { Fragment, Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
 import DocumentBlockNodeView from '../components/document-block-node-view.vue';
 import { BlockInfo, getBlockInfoFromPos, getBlockInfoFromResolvedPos } from '../utils/block-info';
+import { PRIORITY_DOCUMENT_BLOCK } from '../constants';
 
 function isAtBlockStart($pos: ResolvedPos, $block?: ResolvedPos | null) {
 	$block = $block ?? getBlockInfoFromResolvedPos($pos)?.$block;
@@ -58,7 +59,7 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 	draggable: true,
 	selectable: false,
 	defining: true,
-	priority: 200,
+	priority: PRIORITY_DOCUMENT_BLOCK,
 
 	addOptions() {
 		return {

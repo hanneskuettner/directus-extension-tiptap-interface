@@ -79,20 +79,43 @@
 					<v-icon name="format_strikethrough" />
 				</v-button>
 			</div>
+			<div class="toolbar-group">
+				<v-button
+					v-tooltip="t('wysiwyg_options.indent') + ' - ' + translateShortcut(['tab'])"
+					:disabled="!canIndent"
+					x-small
+					icon
+					@click="indent"
+				>
+					<v-icon name="format_indent_increase" />
+				</v-button>
+				<v-button
+					v-tooltip="t('wysiwyg_options.outdent') + ' - ' + translateShortcut(['shift', 'tab'])"
+					:disabled="!canOutdent"
+					x-small
+					icon
+					@click="outdent"
+				>
+					<v-icon name="format_indent_decrease" />
+				</v-button>
+			</div>
 		</div>
 	</v-menu>
 </template>
 
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue';
-import { Editor } from '@tiptap/vue-3';
+import { Editor, findParentNodeClosestToPos } from '@tiptap/vue-3';
 import { isNodeSelection, isTextSelection, posToDOMRect } from '@tiptap/core';
+import { Node } from '@tiptap/pm/model';
 import { useI18n } from 'vue-i18n';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import { translateShortcut } from '../utils/translate-shortcut';
 import { isExtensionInstalled } from '../helpers/isExtensionInstalled';
 import { getBlockInfoFromResolvedPos } from '../utils/block-info';
 import suggestion, { CommandItem } from '../suggestion';
+import { controlledComputed } from '../utils/controlled-computed';
+import { first } from '@tiptap/core/dist/packages/core/src/commands';
 
 const props = defineProps<{
 	editor: Editor;
@@ -199,11 +222,22 @@ watch([shouldShow, positionRect], ([newShow, _], [oldShown, __]) => {
 	}
 });
 
-const selectedBlockInfo = computed(() => getBlockInfoFromResolvedPos(editor.value.state.selection.$anchor));
+const selectedBlockInfo = computed(() =>
+	editor.value ? getBlockInfoFromResolvedPos(editor.value.state.selection.$anchor) : undefined
+);
 
 const contentType = computed(() => {
-	return selectedBlockInfo.value?.contentType?.name;
+	const { selection } = editor.value.state;
+	const { $anchor } = selection;
+
+	const firstBlockTypeParent = findParentNodeClosestToPos(
+		$anchor,
+		(node: Node) => node.type.name !== 'paragraph' && node.type.groups?.includes('block')
+	);
+	const isDirectChildOfDocBlock = firstBlockTypeParent?.node.type.name === 'docBlock' || !firstBlockTypeParent;
+	return isDirectChildOfDocBlock ? selectedBlockInfo.value?.contentType.name : firstBlockTypeParent?.node.type.name;
 });
+
 const activeContentTypeMeta = computed(() =>
 	availableTurnIntoCommands.value.find(
 		({ contentType: type, attrs }) =>
@@ -212,6 +246,7 @@ const activeContentTypeMeta = computed(() =>
 				Object.entries(attrs).every(([key, value]) => selectedBlockInfo.value?.contentNode?.attrs[key] === value))
 	)
 );
+
 const contentTypeTitle = computed(() => {
 	return activeContentTypeMeta.value?.title;
 });
@@ -228,6 +263,18 @@ const toggleBold = () => editor.value.chain().focus().toggleBold().run();
 const toggleItalic = () => editor.value.chain().focus().toggleItalic().run();
 const toggleUnderline = () => editor.value.chain().focus().toggleUnderline().run();
 const toggleStrike = () => editor.value.chain().focus().toggleStrike().run();
+
+const canIndent = controlledComputed(
+	() => selectedBlockInfo.value?.depth,
+	() => editor.value?.can().sinkListItem('docBlock') ?? false
+);
+const indent = () => editor.value.chain().focus().sinkListItem('docBlock').run();
+
+const canOutdent = controlledComputed(
+	() => selectedBlockInfo.value?.depth,
+	() => editor.value?.can().liftListItem('docBlock') ?? false
+);
+const outdent = () => editor.value.chain().focus().liftListItem('docBlock').run();
 </script>
 
 <style lang="scss" scoped>

@@ -27,7 +27,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUpdate, ref, toRefs } from 'vue';
-import { groupBy, sortBy } from 'lodash';
+import { groupBy, sortBy } from 'lodash-es';
 
 interface Item {
 	title: string;

@@ -1,10 +1,11 @@
 import { Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
+import { PRIORITY_SLASH_COMMAND } from '../constants';
 
 export const SlashCommand = Extension.create({
 	name: 'slashCommand',
 	// make sure the key handlers always get priority
-	priority: 1000,
+	priority: PRIORITY_SLASH_COMMAND,
 
 	addOptions() {
 		return {

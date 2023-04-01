@@ -1,8 +1,8 @@
 <template>
-	<node-view-wrapper data-drag-handle class="image-node">
-		<div class="wrapper">
+	<node-view-wrapper ref="root" class="image-node no-placeholder" as="div">
+		<div class="wrapper" contenteditable="false">
 			<div class="actions">
-				<context-menu :select-block="selectBlock" :get-first-child-pos="getPos" :editor="editor" is-image-block>
+				<context-menu :get-pos="getPos" :editor="editor">
 					<template #activator="{ toggle }">
 						<v-button small icon @click="toggle">
 							<v-icon class="options" name="more_horiz" />
@@ -17,13 +17,17 @@
 				:alt="node.attrs.alt"
 				role="presentation"
 			/>
-			<v-upload v-else from-library from-url @input="setSrc" />
+			<v-upload v-else from-library from-url @input="onImageUpload" />
+		</div>
+		<div v-if="isFigure" class="caption" :data-placeholder="root?.$el.dataset.placeholder">
+			<node-view-content />
 		</div>
 	</node-view-wrapper>
 </template>
 
 <script lang="ts" setup>
-import { Editor, NodeViewWrapper } from '@tiptap/vue-3';
+import { Editor, NodeViewContent, NodeViewWrapper } from '@tiptap/vue-3';
+import { computed, ref } from 'vue';
 import { Node, NodeView } from '@tiptap/pm/model';
 import ContextMenu from './context-menu.vue';
 import { getPublicURL } from '../utils/get-root-path';
@@ -31,27 +35,30 @@ import { getPublicURL } from '../utils/get-root-path';
 const props = defineProps<{
 	node: Node;
 	getPos: NodeView['getPos'];
-	deleteNode: NodeView['deleteNode'];
 	editor: Editor;
 }>();
 
-function selectBlock() {
-	props.editor.commands.setNodeSelection(props.getPos());
-	props.editor.commands.selectParentNode();
-}
+const root = ref(null);
+const isFigure = computed(() => props.node.type.name === 'figure');
 
-function setSrc(image) {
-	let url = getPublicURL() + `assets/` + image.id;
-	const view = props.editor.view;
-	view.dispatch(view.state.tr.setNodeMarkup(props.getPos(), null, { src: url }));
+function onImageUpload({ id }) {
+	let url = getPublicURL() + `assets/` + id;
+	const { editor } = props;
+	const { view, state } = editor;
+
+	// TODO
+	// if (props.imageToken) {
+	//   url += '?access_token=' + props.imageToken;
+	// }
+
+	view.dispatch(state.tr.setNodeMarkup(props.getPos(), null, { src: url, id }));
 }
 </script>
 
 <style lang="scss" scoped>
 .image-node {
 	--v-button-background-color: var(--border-subdued);
-
-	display: flex;
+	--placeholder: attr(data-placeholder);
 
 	img {
 		width: 100%;
@@ -69,5 +76,13 @@ function setSrc(image) {
 	top: 4px;
 	right: 4px;
 	z-index: 1;
+}
+
+.empty .caption:before {
+	content: attr(data-placeholder);
+	opacity: 0.4;
+	float: left;
+	height: 0;
+	pointer-events: none;
 }
 </style>
