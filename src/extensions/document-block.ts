@@ -1,17 +1,11 @@
 import DocumentBlockNodeView from '@/components/node-views/node-view-document-block.vue';
 import { PRIORITY_DOCUMENT_BLOCK } from '@/constants';
+import { isAtBlockStart } from '@/helpers/isAtBlockStart';
 import { BlockInfo, getBlockInfoFromPos, getBlockInfoFromResolvedPos } from '@/utils/block-info';
 import { mergeAttributes, Node, selectionToInsertionEnd } from '@tiptap/core';
-import { Fragment, Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model';
-import { Selection, TextSelection } from '@tiptap/pm/state';
+import { Fragment, Node as ProseMirrorNode } from '@tiptap/pm/model';
+import { TextSelection } from '@tiptap/pm/state';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
-
-function isAtBlockStart($pos: ResolvedPos, $block?: ResolvedPos | null) {
-	$block = $block ?? getBlockInfoFromResolvedPos($pos)?.$block;
-	if (!$block) return false;
-
-	return $pos.pos === $block.pos + $pos.depth - $block.depth;
-}
 
 function getPreviousBlock(doc: ProseMirrorNode, pos: number, predicate?: (blockInfo: BlockInfo) => boolean) {
 	const startBlock = getBlockInfoFromPos(doc, pos);
@@ -38,24 +32,21 @@ interface CreateBlockOptions {
 	updateSelection?: boolean;
 }
 
-export interface DocumentBlockOptions {
-	ignoreKeysIn: string[];
-}
-
 declare module '@tiptap/core' {
 	interface Commands<ReturnType> {
 		block: {
 			createBlockAbove: (options?: CreateBlockOptions) => ReturnType;
 			createBlockBelow: (options?: CreateBlockOptions) => ReturnType;
 			convertBlockToDefaultState: (options?: { skip?: string[] }) => ReturnType;
+			mergeBlockIntoPrevious: () => ReturnType;
 		};
 	}
 }
 
-export const DocumentBlock = Node.create<DocumentBlockOptions>({
+export const DocumentBlock = Node.create({
 	name: 'docBlock',
 	group: 'docBlock',
-	content: 'block blockGroup*',
+	content: '(block blockGroup?) | fullBlock',
 	draggable: true,
 	selectable: false,
 	defining: true,
@@ -65,7 +56,6 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 
 	addOptions() {
 		return {
-			ignoreKeysIn: [],
 			HTMLAttributes: {},
 		};
 	},
@@ -80,172 +70,6 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 
 	addNodeView() {
 		return VueNodeViewRenderer(DocumentBlockNodeView);
-	},
-
-	addKeyboardShortcuts() {
-		const handleBackspace = () =>
-			this.editor.commands.first(({ commands }) => [
-				() => commands.deleteSelection(),
-				() => commands.undoInputRule(),
-				// maybe convert the block back to its default state (a paragraph)
-				() => commands.convertBlockToDefaultState(),
-				// removes a level of nesting if the block is indented if the selection is at the start of the block.
-				() =>
-					commands.command(({ state }) => {
-						if (isAtBlockStart(state.selection.$anchor)) {
-							return commands.liftListItem('docBlock');
-						}
-
-						return false;
-					}),
-				// try merge blocks
-				() =>
-					commands.command(({ tr, dispatch }) => {
-						const { selection, doc } = tr;
-						const { empty, $anchor } = selection;
-
-						const isAtDocStart = Selection.atStart(doc).from === $anchor.pos;
-						const blockInfo = getBlockInfoFromResolvedPos($anchor);
-
-						if (!empty || isAtDocStart || !blockInfo || !isAtBlockStart($anchor, blockInfo.$block)) {
-							return false;
-						}
-
-						// merge blocks
-						const { $block, start, end, contentNode, nestedBlockCount } = blockInfo;
-
-						// remove one level of nesting from any nested blocks
-						if (nestedBlockCount > 0) {
-							const nestedStart = doc.resolve(start + contentNode.nodeSize + 1);
-							const nestedEnd = doc.resolve(end - 1);
-
-							if (dispatch) {
-								tr.lift(nestedStart.blockRange(nestedEnd)!, $block.depth - 1);
-							}
-						}
-
-						const prevBlockInfo = getPreviousBlock(
-							doc,
-							start,
-							(b) => b.contentType.spec.selectable !== false // might be undefined
-						);
-
-						if (!prevBlockInfo) {
-							return false;
-						}
-
-						if (dispatch) {
-							tr.deleteRange(start, start + contentNode.nodeSize);
-							tr = tr.insert(prevBlockInfo.end - 1, contentNode.content);
-							tr.setSelection(new TextSelection(tr.doc.resolve(prevBlockInfo.end - 1)));
-						}
-
-						return true;
-					}),
-				() => commands.joinBackward(),
-				() => commands.selectNodeBackward(),
-			]);
-
-		const handleEnter = () =>
-			this.editor.commands.first(({ commands }) => [
-				() => commands.deleteSelection(),
-				() => commands.convertBlockToDefaultState({ skip: this.options.ignoreKeysIn }),
-				// if at the end of a block, create a new block below
-				() =>
-					commands.command(({ state }) => {
-						const { $to } = state.selection;
-						const { contentType } = getBlockInfoFromResolvedPos($to)!;
-
-						if (this.options.ignoreKeysIn.indexOf(contentType.name) !== -1) {
-							return false;
-						}
-
-						if ($to.parentOffset === $to.parent.content.size) {
-							return commands.createBlockBelow();
-						}
-
-						return false;
-					}),
-				// if at the beginning create a new block above
-				() =>
-					commands.command(({ state }) => {
-						const { $to } = state.selection;
-						const { contentType } = getBlockInfoFromResolvedPos($to)!;
-
-						if (this.options.ignoreKeysIn.indexOf(contentType.name) !== -1) {
-							return false;
-						}
-
-						if ($to.parentOffset === 0) {
-							return commands.createBlockAbove({ updateSelection: false });
-						}
-
-						return false;
-					}),
-				// try and split block
-				() =>
-					commands.command(({ state }) => {
-						const { selection, doc } = state;
-						const { $head, from, $to } = selection;
-						const { contentType } = getBlockInfoFromResolvedPos($head)!;
-
-						if (this.options.ignoreKeysIn.indexOf(contentType.name) !== -1) {
-							return false;
-						}
-
-						// get the remaining content until the end of the block
-						const distToEnd = $to.parent.content.size - $to.parentOffset;
-						const content = doc.slice(from, from + distToEnd)?.toJSON().content;
-
-						// insert a new block with the content wrapped in a paragraph
-						commands.insertContentAt(
-							{ from, to: from + distToEnd },
-							{
-								type: DocumentBlock.name,
-								content: [
-									{
-										type: 'paragraph',
-										content,
-									},
-								],
-							}
-						);
-						commands.setTextSelection(from + 4);
-						return true;
-					}),
-			]);
-
-		return {
-			Backspace: handleBackspace,
-			Tab: ({ editor }) => {
-				return editor.commands.sinkListItem('docBlock');
-			},
-			'Shift-Tab': ({ editor }) => {
-				return editor.commands.liftListItem('docBlock');
-			},
-			Enter: handleEnter,
-			'Mod-a': ({ editor }) =>
-				editor.commands.command(({ state, dispatch }) => {
-					const { selection } = state;
-					const { $from, $to } = selection;
-					const spansMultipleNodes = !$from.sameParent($to);
-					const isFullNodeSelected = $from.parentOffset === 0 && $to.parentOffset === $to.parent.content.size;
-
-					if (spansMultipleNodes || isFullNodeSelected) {
-						return false;
-					}
-
-					let depth = $from.depth;
-					while ($from.node(depth).isInline) {
-						if (!depth) return false;
-						depth--;
-					}
-					if (!$from.node(depth).isTextblock) return false;
-					if (dispatch)
-						dispatch(state.tr.setSelection(TextSelection.create(state.doc, $from.start(depth), $from.end(depth))));
-					return true;
-				}),
-		};
 	},
 
 	addCommands() {
@@ -324,6 +148,45 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 					}
 
 					return commands.clearNodes();
+				},
+			mergeBlockIntoPrevious:
+				() =>
+				({ tr, state, dispatch }) => {
+					const { doc } = tr;
+					const { $anchor } = state.selection;
+					const blockInfo = getBlockInfoFromResolvedPos($anchor);
+
+					if (!blockInfo) return false;
+
+					const { $block, start, end, contentNode, nestedBlockCount } = blockInfo;
+
+					// remove one level of nesting from any nested blocks
+					if (nestedBlockCount > 0) {
+						const nestedStart = doc.resolve(start + contentNode.nodeSize + 1);
+						const nestedEnd = doc.resolve(end - 1);
+
+						if (dispatch) {
+							tr.lift(nestedStart.blockRange(nestedEnd)!, $block.depth - 1);
+						}
+					}
+
+					const prevBlockInfo = getPreviousBlock(
+						doc,
+						start,
+						(b) => b.contentType.spec.selectable !== false // might be undefined
+					);
+
+					if (!prevBlockInfo) {
+						return false;
+					}
+
+					if (dispatch) {
+						tr.deleteRange(start, start + contentNode.nodeSize);
+						tr = tr.insert(prevBlockInfo.end - 1, contentNode.content);
+						tr.setSelection(new TextSelection(tr.doc.resolve(prevBlockInfo.end - 1)));
+					}
+
+					return true;
 				},
 		};
 	},

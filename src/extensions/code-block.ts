@@ -11,6 +11,8 @@ import { get } from 'lodash-es';
 export const CodeBlock = CodeBlockLowlight.extend({
 	priority: priorityHigher(PRIORITY_DOCUMENT_BLOCK),
 
+	group: 'fullBlock',
+
 	addAttributes() {
 		const attrs = this.parent?.() as Attributes;
 		const { aliases } = getHighlightLanguages();

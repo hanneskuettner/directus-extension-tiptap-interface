@@ -15,6 +15,7 @@ import History from '@/extensions/history';
 import HorizontalRule from '@/extensions/horizontal-rule';
 import Image from '@/extensions/image';
 import Italic from '@/extensions/italic';
+import ExtendedKeymap from '@/extensions/keymap';
 import Link from '@/extensions/link';
 import ListItem from '@/extensions/list-item';
 import OrderedList from '@/extensions/ordered-list';
@@ -45,12 +46,13 @@ export function useEditor(options: Partial<EditorOptions> = {}) {
 			lowlight,
 		}),
 		Document,
-		DocumentBlock.configure({
-			ignoreKeysIn: ['codeBlock'],
-		}),
+		DocumentBlock,
 		DropCursor.configure({
 			color: 'var(--primary)',
 			width: 2,
+		}),
+		ExtendedKeymap.configure({
+			ignoreKeysIn: ['codeBlock'],
 		}),
 		Figure,
 		Focus.configure({

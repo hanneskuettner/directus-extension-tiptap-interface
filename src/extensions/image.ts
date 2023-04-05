@@ -6,6 +6,8 @@ export const Image = TipTapImage.extend({
 	draggable: false,
 	selectable: false,
 
+	group: 'fullBlock',
+
 	addAttributes() {
 		return {
 			...this.parent?.(),

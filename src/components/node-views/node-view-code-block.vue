@@ -55,7 +55,7 @@ function selectLanguage(language) {
 
 	.v-menu {
 		display: block;
-		margin: 4px 0 4px -28px;
+		margin: 4px 0 4px -32px;
 		user-select: none;
 		transition: opacity 200ms ease-in-out;
 		opacity: 0;
