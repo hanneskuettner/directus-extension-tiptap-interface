@@ -1,8 +1,9 @@
-import { HorizontalRule as TipTapHorizontalRule } from '@tiptap/extension-horizontal-rule';
 import { InputRule } from '@tiptap/core';
+import { HorizontalRule as TipTapHorizontalRule } from '@tiptap/extension-horizontal-rule';
 
 export const HorizontalRule = TipTapHorizontalRule.extend({
 	selectable: false,
+	group: 'blockWithoutChildren',
 
 	addInputRules() {
 		return [

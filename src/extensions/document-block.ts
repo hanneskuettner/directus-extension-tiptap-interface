@@ -46,7 +46,7 @@ declare module '@tiptap/core' {
 export const DocumentBlock = Node.create({
 	name: 'docBlock',
 	group: 'docBlock',
-	content: '(block blockGroup?) | fullBlock',
+	content: '(block blockGroup?) | blockWithoutChildren',
 	draggable: true,
 	selectable: false,
 	defining: true,

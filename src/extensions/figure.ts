@@ -42,7 +42,7 @@ export const Figure = Node.create<FigureOptions>({
 		};
 	},
 
-	group: 'block',
+	group: 'blockWithoutChildren',
 
 	content: 'inline*',
 

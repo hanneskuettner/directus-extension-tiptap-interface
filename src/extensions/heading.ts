@@ -2,6 +2,8 @@ import { nodePasteRule } from '@/helpers/nodePasteRule';
 import { Heading as TipTapHeading } from '@tiptap/extension-heading';
 
 export const Heading = TipTapHeading.extend({
+	group: 'blockWithoutChildren',
+
 	addPasteRules() {
 		return this.options.levels.map((level) => {
 			return nodePasteRule({

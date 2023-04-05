@@ -11,7 +11,7 @@ import { get } from 'lodash-es';
 export const CodeBlock = CodeBlockLowlight.extend({
 	priority: priorityHigher(PRIORITY_DOCUMENT_BLOCK),
 
-	group: 'fullBlock',
+	group: 'blockWithoutChildren',
 
 	addAttributes() {
 		const attrs = this.parent?.() as Attributes;
