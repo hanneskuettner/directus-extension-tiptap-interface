@@ -1,8 +1,8 @@
 // findParentNodeClosestToPos modified from (also needs to test at depth 0)
 // https://github.com/ueberdosis/tiptap/blob/8eb8252d011c33899de04cf4aae1a3ca3ea3b21a/packages/core/src/helpers/findParentNodeClosestToPos.ts#L5
 
-import { Node, ResolvedPos } from '@tiptap/pm/model';
 import { Predicate } from '@tiptap/core';
+import { Node, ResolvedPos } from '@tiptap/pm/model';
 
 export function findParentNodeClosestToPos(
 	$pos: ResolvedPos,

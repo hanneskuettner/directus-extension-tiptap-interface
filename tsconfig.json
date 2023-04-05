@@ -22,7 +22,10 @@
 		"forceConsistentCasingInFileNames": true,
 		"allowSyntheticDefaultImports": true,
 		"isolatedModules": true,
-		"rootDir": "./src"
+		"rootDir": "./src",
+		"paths": {
+		  "@/*": ["src/*"],
+		}
 	},
 	"include": ["./src/**/*.ts"]
 }

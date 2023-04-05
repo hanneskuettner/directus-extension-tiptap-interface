@@ -1,6 +1,6 @@
+import { PRIORITY_SLASH_COMMAND } from '@/constants';
 import { Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
-import { PRIORITY_SLASH_COMMAND } from '../constants';
 
 export const SlashCommand = Extension.create({
 	name: 'slashCommand',

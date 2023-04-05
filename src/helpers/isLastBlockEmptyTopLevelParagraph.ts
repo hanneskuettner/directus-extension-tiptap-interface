@@ -1,5 +1,5 @@
+import { getBlockInfoFromPos } from '@/utils/block-info';
 import { Node } from '@tiptap/pm/model';
-import { getBlockInfoFromPos } from '../utils/block-info';
 
 export function isLastBlockEmptyTopLevelParagraph(doc: Node) {
 	const blockInfo = getBlockInfoFromPos(doc, doc.content.size - 2);

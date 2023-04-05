@@ -1,6 +1,7 @@
+import { isLastBlockEmptyTopLevelParagraph } from '@/helpers/isLastBlockEmptyTopLevelParagraph';
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
-import { isLastBlockEmptyTopLevelParagraph } from '../helpers/isLastBlockEmptyTopLevelParagraph';
+
 /**
  * Extension based on:
  * - https://github.com/ueberdosis/tiptap/blob/v1/packages/tiptap-extensions/src/extensions/TrailingNode.js

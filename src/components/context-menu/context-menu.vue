@@ -44,14 +44,14 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n';
-import { computed, ref, toRefs, watch } from 'vue';
-import { getPublicURL } from '../utils/get-root-path';
+import { IMAGE_TYPE_NAMES } from '@/constants';
+import { getBlockInfoFromPos } from '@/utils/block-info';
+import { controlledComputed } from '@/utils/controlled-computed';
+import { getPublicURL } from '@/utils/get-root-path';
 import { Node } from '@tiptap/pm/model';
 import { Editor } from '@tiptap/vue-3';
-import { getBlockInfoFromPos } from '../utils/block-info';
-import { controlledComputed } from '../utils/controlled-computed';
-import { IMAGE_TYPE_NAMES } from '../constants';
+import { computed, ref, toRefs, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = withDefaults(
 	defineProps<{
@@ -85,7 +85,10 @@ watch(open, () => {
 
 const blockInfo = controlledComputed(
 	() => getPos.value(),
-	() => getBlockInfoFromPos(props.editor.state.doc, getPos.value())
+	() =>
+		getPos.value() < props.editor.state.doc.nodeSize
+			? getBlockInfoFromPos(props.editor.state.doc, getPos.value())
+			: undefined
 );
 const isImageBlock = computed(() => IMAGE_TYPE_NAMES.includes(blockInfo.value?.contentType.name));
 

@@ -1,10 +1,10 @@
 // extension based on https://github.com/ueberdosis/tiptap/blob/main/demos/src/Experiments/Figure/Vue/figure.ts
 
-import { findChildrenInRange, mergeAttributes, Node, nodeInputRule, Tracker, Range } from '@tiptap/core';
+import ImageNodeView from '@/components/node-views/node-view-image.vue';
+import { PRIORITY_DOCUMENT_BLOCK } from '@/constants';
+import { priorityHigher } from '@/utils/priority';
+import { findChildrenInRange, mergeAttributes, Node, nodeInputRule, Range, Tracker } from '@tiptap/core';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
-import ImageNodeView from '../components/image-node-view.vue';
-import { priorityHigher } from '../utils/priority';
-import { PRIORITY_DOCUMENT_BLOCK } from '../constants';
 
 export interface FigureOptions {
 	HTMLAttributes: Record<string, any>;
@@ -75,7 +75,12 @@ export const Figure = Node.create<FigureOptions>({
 	},
 
 	renderHTML({ HTMLAttributes }) {
-		return ['vue-component', mergeAttributes(HTMLAttributes), 0];
+		return [
+			'figure',
+			this.options.HTMLAttributes,
+			['img', mergeAttributes(HTMLAttributes, { draggable: false, contenteditable: false })],
+			['figcaption', 0],
+		];
 	},
 
 	parseHTML() {

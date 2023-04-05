@@ -1,5 +1,5 @@
-import { NodeType, Node, ResolvedPos } from '@tiptap/pm/model';
-import { findParentNodeClosestToPos } from '../helpers/findParentNodeClosestToPos';
+import { findParentNodeClosestToPos } from '@/helpers/findParentNodeClosestToPos';
+import { Node, NodeType, ResolvedPos } from '@tiptap/pm/model';
 
 export interface BlockInfo {
 	$block: ResolvedPos;

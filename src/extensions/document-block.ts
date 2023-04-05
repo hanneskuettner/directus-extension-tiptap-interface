@@ -1,10 +1,10 @@
-import { Node, mergeAttributes, selectionToInsertionEnd } from '@tiptap/core';
-import { TextSelection, Selection } from '@tiptap/pm/state';
+import DocumentBlockNodeView from '@/components/node-views/node-view-document-block.vue';
+import { PRIORITY_DOCUMENT_BLOCK } from '@/constants';
+import { BlockInfo, getBlockInfoFromPos, getBlockInfoFromResolvedPos } from '@/utils/block-info';
+import { mergeAttributes, Node, selectionToInsertionEnd } from '@tiptap/core';
 import { Fragment, Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model';
+import { Selection, TextSelection } from '@tiptap/pm/state';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
-import DocumentBlockNodeView from '../components/document-block-node-view.vue';
-import { BlockInfo, getBlockInfoFromPos, getBlockInfoFromResolvedPos } from '../utils/block-info';
-import { PRIORITY_DOCUMENT_BLOCK } from '../constants';
 
 function isAtBlockStart($pos: ResolvedPos, $block?: ResolvedPos | null) {
 	$block = $block ?? getBlockInfoFromResolvedPos($pos)?.$block;
@@ -60,6 +60,8 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 	selectable: false,
 	defining: true,
 	priority: PRIORITY_DOCUMENT_BLOCK,
+
+	foobar: true,
 
 	addOptions() {
 		return {
@@ -216,14 +218,33 @@ export const DocumentBlock = Node.create<DocumentBlockOptions>({
 		return {
 			Backspace: handleBackspace,
 			Tab: ({ editor }) => {
-				editor.commands.sinkListItem('docBlock');
-				return true;
+				return editor.commands.sinkListItem('docBlock');
 			},
 			'Shift-Tab': ({ editor }) => {
-				editor.commands.liftListItem('docBlock');
-				return true;
+				return editor.commands.liftListItem('docBlock');
 			},
 			Enter: handleEnter,
+			'Mod-a': ({ editor }) =>
+				editor.commands.command(({ state, dispatch }) => {
+					const { selection } = state;
+					const { $from, $to } = selection;
+					const spansMultipleNodes = !$from.sameParent($to);
+					const isFullNodeSelected = $from.parentOffset === 0 && $to.parentOffset === $to.parent.content.size;
+
+					if (spansMultipleNodes || isFullNodeSelected) {
+						return false;
+					}
+
+					let depth = $from.depth;
+					while ($from.node(depth).isInline) {
+						if (!depth) return false;
+						depth--;
+					}
+					if (!$from.node(depth).isTextblock) return false;
+					if (dispatch)
+						dispatch(state.tr.setSelection(TextSelection.create(state.doc, $from.start(depth), $from.end(depth))));
+					return true;
+				}),
 		};
 	},
 

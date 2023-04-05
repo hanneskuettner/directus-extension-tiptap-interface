@@ -1,6 +1,6 @@
+import { BlockNode } from '@/types/block';
 import { Node, Schema } from '@tiptap/pm/model';
 import { getBlockInfoFromPos } from './block-info';
-import { BlockNode } from '../types/block';
 
 function getTopLevelBlockNodes(doc: Node) {
 	const nodes: Node[] = [];

@@ -26,11 +26,11 @@
 </template>
 
 <script lang="ts" setup>
+import ContextMenu from '@/components/context-menu/context-menu.vue';
+import { getPublicURL } from '@/utils/get-root-path';
+import { Node, NodeView } from '@tiptap/pm/model';
 import { Editor, NodeViewContent, NodeViewWrapper } from '@tiptap/vue-3';
 import { computed, ref } from 'vue';
-import { Node, NodeView } from '@tiptap/pm/model';
-import ContextMenu from './context-menu.vue';
-import { getPublicURL } from '../utils/get-root-path';
 
 const props = defineProps<{
 	node: Node;

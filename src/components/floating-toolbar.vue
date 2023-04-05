@@ -104,18 +104,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue';
-import { Editor, findParentNodeClosestToPos } from '@tiptap/vue-3';
+import { isExtensionInstalled } from '@/helpers/isExtensionInstalled';
+import suggestion, { CommandItem } from '@/suggestion';
+import { getBlockInfoFromResolvedPos } from '@/utils/block-info';
+import { controlledComputed } from '@/utils/controlled-computed';
+import { translateShortcut } from '@/utils/translate-shortcut';
 import { isNodeSelection, isTextSelection, posToDOMRect } from '@tiptap/core';
 import { Node } from '@tiptap/pm/model';
-import { useI18n } from 'vue-i18n';
+import { Editor, findParentNodeClosestToPos } from '@tiptap/vue-3';
 import { debounce } from 'lodash-es';
-import { translateShortcut } from '../utils/translate-shortcut';
-import { isExtensionInstalled } from '../helpers/isExtensionInstalled';
-import { getBlockInfoFromResolvedPos } from '../utils/block-info';
-import suggestion, { CommandItem } from '../suggestion';
-import { controlledComputed } from '../utils/controlled-computed';
-import { first } from '@tiptap/core/dist/packages/core/src/commands';
+import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
 	editor: Editor;
@@ -176,7 +175,9 @@ const shouldShow = computed(() => {
 	// So we check also for an empty text size.
 	const isEmptyTextBlock = !doc.textBetween(from, to).length && isTextSelection(selection);
 
-	return !empty && !isEmptyTextBlock && editor.value.isEditable;
+	const isCodeBlock = editor.value.isActive('codeBlock');
+
+	return !empty && !isEmptyTextBlock && !isCodeBlock && editor.value.isEditable;
 });
 
 const positionRect = computed(() => {

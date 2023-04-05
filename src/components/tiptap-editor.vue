@@ -6,13 +6,13 @@
 </template>
 
 <script lang="ts" setup>
+import { useEditor } from '@/composables/useEditor';
+import { BlockNode } from '@/types/block';
+import { blocksToDoc, docToBlocks } from '@/utils/node-conversions';
 import { Editor, EditorContent, JSONContent } from '@tiptap/vue-3';
-import { useEditor } from '../composables/useEditor';
-import { ref, toRefs, watch } from 'vue';
 import { isEqual } from 'lodash-es';
+import { ref, toRefs, watch } from 'vue';
 import FloatingToolbar from './floating-toolbar.vue';
-import { blocksToDoc, docToBlocks } from '../utils/node-conversions';
-import { BlockNode } from '../types/block';
 
 const props = withDefaults(
 	defineProps<{

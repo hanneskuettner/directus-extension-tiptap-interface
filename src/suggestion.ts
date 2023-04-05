@@ -1,9 +1,9 @@
-import { ChainedCommands, VueRenderer } from '@tiptap/vue-3';
+import CommandsList from '@/components/command-list.vue';
+import { isExtensionInstalled } from '@/helpers/isExtensionInstalled';
 import { Editor, Range, RawCommands } from '@tiptap/core';
-import { nextTick } from 'vue';
 import { Attrs } from '@tiptap/pm/model';
-import { isExtensionInstalled } from './helpers/isExtensionInstalled';
-import CommandsList from './components/command-list.vue';
+import { ChainedCommands, VueRenderer } from '@tiptap/vue-3';
+import { nextTick } from 'vue';
 
 export interface CommandItem {
 	title: string;
@@ -242,6 +242,13 @@ const commands: CommandItem[] = [
 		icon: 'code',
 		group: 'media',
 		command: createBlockWith('codeBlock'),
+		enabled: isExtensionInstalled('codeBlock'),
+	},
+	{
+		title: 'Code',
+		icon: 'code',
+		group: 'turnInto',
+		command: runCommand('setCodeBlock'),
 		enabled: isExtensionInstalled('codeBlock'),
 	},
 ];

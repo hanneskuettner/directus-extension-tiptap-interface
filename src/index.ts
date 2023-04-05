@@ -1,5 +1,5 @@
+import TipTapEditor from '@/components/tiptap-editor.vue';
 import { defineInterface } from '@directus/extensions-sdk';
-import TipTapEditor from './components/tiptap-editor.vue';
 
 export default defineInterface({
 	id: 'tiptap-editor',
@@ -9,4 +9,5 @@ export default defineInterface({
 	component: TipTapEditor,
 	options: null,
 	types: ['json'],
+	group: 'standard',
 });

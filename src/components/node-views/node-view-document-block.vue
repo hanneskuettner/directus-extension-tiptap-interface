@@ -32,11 +32,11 @@
 </template>
 
 <script lang="ts" setup>
-import { Editor, NodeViewContent, NodeViewWrapper } from '@tiptap/vue-3';
+import ContextMenu from '@/components/context-menu/context-menu.vue';
+import { translateShortcut } from '@/utils/translate-shortcut.js';
 import { Node } from '@tiptap/pm/model';
-import ContextMenu from './context-menu.vue';
-import { computed, ref, toRefs } from 'vue';
-import { translateShortcut } from '../utils/translate-shortcut';
+import { Editor, NodeViewContent, NodeViewWrapper } from '@tiptap/vue-3';
+import { ref, toRefs } from 'vue';
 
 const props = defineProps<{
 	node: Node;
